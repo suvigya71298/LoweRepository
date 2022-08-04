@@ -84,8 +84,7 @@ public class UrlServiceImpl implements UrlService {
 	@Override
 	public Url getOriginalLink(String shortUrl) {
 		
-		shortUrl="http://localhost:8080/"+shortUrl;
-		System.out.println(shortUrl);
+		shortUrl="http://localhost:8080/"+shortUrl;		
 		Url originalLink=urlRepository.findByShortLink(shortUrl);
 		if(originalLink!=null)
 		return originalLink;

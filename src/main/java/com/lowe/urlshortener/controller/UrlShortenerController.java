@@ -47,22 +47,18 @@ public class UrlShortenerController {
 		UrlErrorResponseDto urlErrorResponseDto = new UrlErrorResponseDto("","");
         urlErrorResponseDto.setStatus("404");
         urlErrorResponseDto.setError("There was an error processing your request. please try again.");
-        return new ResponseEntity<UrlErrorResponseDto>(urlErrorResponseDto,HttpStatus.OK);
-
-		
+        return new ResponseEntity<UrlErrorResponseDto>(urlErrorResponseDto,HttpStatus.OK);		
 	}
 	
 	@GetMapping(value="/{shortLink}")
-	public ResponseEntity<?> getOriginalLink(@PathVariable String shortLink)throws IOException, URISyntaxException{
+	public ResponseEntity<?> getOriginalLink(@PathVariable String shortLink, HttpServletResponse response)throws IOException, URISyntaxException{
 		if(shortLink.length()==0) {
 			UrlErrorResponseDto urlErrorResponseDto=new UrlErrorResponseDto("", "");
 			urlErrorResponseDto.setError("Invalid Url");
 			urlErrorResponseDto.setStatus("400");
 			return new ResponseEntity<UrlErrorResponseDto>(urlErrorResponseDto,HttpStatus.OK);
-		}
-		
-		Url urlToRet = urlService.getOriginalLink(shortLink);
-		//System.out.println(urlToRet);
+		}		
+		Url urlToRet = urlService.getOriginalLink(shortLink);		
 		 if(urlToRet == null)
 	        {
 	            UrlErrorResponseDto urlErrorResponseDto = new UrlErrorResponseDto("","");
@@ -79,7 +75,8 @@ public class UrlShortenerController {
 	            return new ResponseEntity<UrlErrorResponseDto>(urlErrorResponseDto,HttpStatus.OK);
 	        }
 		 	
-		return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(urlToRet.getOriginalUrl()));
+		 response.sendRedirect("https://"+urlToRet.getOriginalUrl());
+		 return null;
 	}
 	
 }
