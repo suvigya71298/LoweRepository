@@ -2,6 +2,7 @@ package com.lowe.urlshortener.service;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+
 import com.google.common.hash.Hashing;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -65,17 +66,7 @@ public class UrlServiceImpl implements UrlService {
 	@Override
 	public void deleteShortLink(Url url) {
 		urlRepository.delete(url);
-		
-	}
-	
-	//Creates Encoded Short link of 8 characters
-	private String encode(String url) {
-		String encodedUrl;
-        LocalDateTime time = LocalDateTime.now();
-        encodedUrl = Hashing.murmur3_32()
-                .hashString(url.concat(time.toString()), StandardCharsets.UTF_8)
-                .toString();
-        return  Constants.DOMAIN_NAME+encodedUrl;
+
 	}
 	
 	//get original URL based on short URL
@@ -93,6 +84,14 @@ public class UrlServiceImpl implements UrlService {
 		} else {
 			throw new UrlNotExistException("Url for this link is not present");
 		}
+	}
+		public static String encode(String url) {
+		String encodedUrl;
+		LocalDateTime time = LocalDateTime.now();
+		encodedUrl = Hashing.murmur3_32()
+				.hashString(url.concat(time.toString()), StandardCharsets.UTF_8)
+				.toString();
+		return  Constants.DOMAIN_NAME+encodedUrl;
 	}
 
 }

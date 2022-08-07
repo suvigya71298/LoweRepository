@@ -9,5 +9,4 @@ import lombok.Data;
 public class UrlResponseDto {
 	private String shortLink;
     public LocalDateTime expirationDate;
-	
 }
