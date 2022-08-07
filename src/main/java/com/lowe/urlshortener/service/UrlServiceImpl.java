@@ -5,9 +5,15 @@ import java.time.LocalDateTime;
 import com.google.common.hash.Hashing;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import com.lowe.urlshortener.dto.UrlDto;
+import org.apache.logging.log4j.util.Strings;
+import com.lowe.urlshortener.constants.Constants;
+import com.lowe.urlshortener.dto.request.UrlDto;
+import com.lowe.urlshortener.exception.ExpiredUrlException;
+import com.lowe.urlshortener.exception.InvalidUrlException;
+import com.lowe.urlshortener.exception.UrlNotExistException;
 import com.lowe.urlshortener.models.Url;
 import com.lowe.urlshortener.repository.UrlRepository;
+import java.util.Optional;
 
 @Component
 public class UrlServiceImpl implements UrlService {
@@ -18,23 +24,18 @@ public class UrlServiceImpl implements UrlService {
 
 	@Override
 	public Url generateShortLink(UrlDto urlDto) {
-		if(urlDto.getUrl()!=null) {				
-			Url existingLink=getShortLink(urlDto.getUrl());
-			if(existingLink!=null)
-			return existingLink;
-		
-			String encodedUrl = encode(urlDto.getUrl());
-			Url urlToPersist = new Url();
-			urlToPersist.setCreationDate(LocalDateTime.now());
-            urlToPersist.setOriginalUrl(urlDto.getUrl());
-            urlToPersist.setShortLink(encodedUrl);
-            urlToPersist.setExpirationDate(getExpirationDate(urlDto.getExpirationDate(),urlToPersist.getCreationDate()));
-            
-            Url urlToRet = persistShortLink(urlToPersist);
-            if(urlToRet != null)
-                return urlToRet;
+		if (Strings.isNotBlank(urlDto.getUrl())) {
+			Optional<Url> existingLink = getShortLink(urlDto.getUrl());
+			return existingLink.orElseGet(() -> persistShortLink(Url.builder()
+																		 .creationDate(LocalDateTime.now())
+																		 .expirationDate(getExpirationDate(
+																				 urlDto.getExpirationDate(),
+																				 LocalDateTime.now()))
+																		 .shortLink(encode(urlDto.getUrl()))
+																		 .originalUrl(urlDto.getUrl())
+																		 .build()));
 		}
-	return null;
+		return null;
 	}
 	
 	//get Expiration Date
@@ -44,23 +45,20 @@ public class UrlServiceImpl implements UrlService {
         {
             return creationDate.plusYears(5);
         }
-        LocalDateTime expirationDateToRet = LocalDateTime.parse(expirationDate);
-        return expirationDateToRet;
+		return LocalDateTime.parse(expirationDate);
     }
 	
 	
 	//insert short link into DB
 	@Override
 	public Url persistShortLink(Url url) {
-		Url urlToRet = urlRepository.save(url);
-        return urlToRet;
+		return urlRepository.save(url);
 	}
 
 	//get short link from the DB
 	@Override
-	public Url getShortLink(String url) {
-		 Url urlToRet = urlRepository.findByOriginalLink(url);
-	        return urlToRet;
+	public Optional<Url> getShortLink(String url) {
+		return urlRepository.findByOriginalLink(url);
 	}
 
 	//Delete the short link from DB 
@@ -72,23 +70,29 @@ public class UrlServiceImpl implements UrlService {
 	
 	//Creates Encoded Short link of 8 characters
 	private String encode(String url) {
-		String encodedUrl = "";
+		String encodedUrl;
         LocalDateTime time = LocalDateTime.now();
         encodedUrl = Hashing.murmur3_32()
                 .hashString(url.concat(time.toString()), StandardCharsets.UTF_8)
                 .toString();
-        return  "http://localhost:8080/"+encodedUrl;
+        return  Constants.DOMAIN_NAME+encodedUrl;
 	}
 	
 	//get original URL based on short URL
 	@Override
-	public Url getOriginalLink(String shortUrl) {
-		
-		shortUrl="http://localhost:8080/"+shortUrl;		
-		Url originalLink=urlRepository.findByShortLink(shortUrl);
-		if(originalLink!=null)
-		return originalLink;
-		
-		return null;
+	public Url getOriginalLink(String shortUrl)throws UrlNotExistException, ExpiredUrlException, InvalidUrlException {
+		if (shortUrl.length() == 0) {
+			throw new InvalidUrlException("Url is short of length");
+		}
+		shortUrl=Constants.DOMAIN_NAME+shortUrl;
+		final Optional<Url> url = urlRepository.findByShortLink(shortUrl);
+		if (url.isPresent() && url.get().getExpirationDate().isBefore(LocalDateTime.now())) {
+			throw new ExpiredUrlException("Url Link is expired");
+		} else if (url.isPresent()) {
+			return url.get();
+		} else {
+			throw new UrlNotExistException("Url for this link is not present");
+		}
 	}
+
 }
