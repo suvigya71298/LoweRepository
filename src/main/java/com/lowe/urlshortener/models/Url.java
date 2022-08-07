@@ -4,8 +4,13 @@ import java.time.LocalDateTime;
 
 import javax.persistence.*;
 
+import lombok.Builder;
+import lombok.Data;
+
 @Entity
 @Table(name = "url")
+@Builder
+@Data
 public class Url {
 
 	@Id
@@ -24,34 +29,15 @@ public class Url {
 	
 	@Column(name = "expire_on")
     private LocalDateTime expirationDate;
-	public long getId() {
-		return id;
-	}
-	public void setId(long id) {
+
+public Url(){
+
+}
+	public Url(long id, String originalUrl, String shortLink, LocalDateTime creationDate, LocalDateTime expirationDate) {
 		this.id = id;
-	}
-	public String getOriginalUrl() {
-		return originalUrl;
-	}
-	public void setOriginalUrl(String originalUrl) {
 		this.originalUrl = originalUrl;
-	}
-	public String getShortLink() {
-		return shortLink;
-	}
-	public void setShortLink(String shortLink) {
 		this.shortLink = shortLink;
-	}
-	public LocalDateTime getCreationDate() {
-		return creationDate;
-	}
-	public void setCreationDate(LocalDateTime creationDate) {
 		this.creationDate = creationDate;
-	}
-	public LocalDateTime getExpirationDate() {
-		return expirationDate;
-	}
-	public void setExpirationDate(LocalDateTime expirationDate) {
 		this.expirationDate = expirationDate;
 	}
 }
