@@ -2,7 +2,6 @@ package com.lowe.urlshortener.service;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-
 import com.google.common.hash.Hashing;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -28,13 +27,13 @@ public class UrlServiceImpl implements UrlService {
 		if (Strings.isNotBlank(urlDto.getUrl())) {
 			Optional<Url> existingLink = getShortLink(urlDto.getUrl());
 			return existingLink.orElseGet(() -> persistShortLink(Url.builder()
-																		 .creationDate(LocalDateTime.now())
-																		 .expirationDate(getExpirationDate(
-																				 urlDto.getExpirationDate(),
-																				 LocalDateTime.now()))
-																		 .shortLink(encode(urlDto.getUrl()))
-																		 .originalUrl(urlDto.getUrl())
-																		 .build()));
+					.creationDate(LocalDateTime.now())
+					.expirationDate(getExpirationDate(
+							urlDto.getExpirationDate(),
+							LocalDateTime.now()))
+					.shortLink(encode(urlDto.getUrl()))
+					.originalUrl(urlDto.getUrl())
+					.build()));
 		}
 		return null;
 	}
@@ -63,12 +62,7 @@ public class UrlServiceImpl implements UrlService {
 	}
 
 	//Delete the short link from DB 
-	@Override
-	public void deleteShortLink(Url url) {
-		urlRepository.delete(url);
 
-	}
-	
 	//get original URL based on short URL
 	@Override
 	public Url getOriginalLink(String shortUrl)throws UrlNotExistException, ExpiredUrlException, InvalidUrlException {

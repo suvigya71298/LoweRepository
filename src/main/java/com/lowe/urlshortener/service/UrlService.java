@@ -20,7 +20,6 @@ public interface UrlService {
 	 	public  Url generateShortLink(UrlDto urlDto);
 	    public  Url persistShortLink(Url url);
 	    public  Optional<Url> getShortLink(String url);
-	    public  void  deleteShortLink(Url url);
 	    public Url getOriginalLink(String shortUrl)throws UrlNotExistException, ExpiredUrlException, InvalidUrlException;;
 
 
