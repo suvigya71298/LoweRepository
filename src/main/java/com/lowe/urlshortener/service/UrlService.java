@@ -1,17 +1,10 @@
 package com.lowe.urlshortener.service;
 
-
-import com.google.common.hash.Hashing;
-import com.lowe.urlshortener.constants.Constants;
-import org.springframework.stereotype.Service;
 import com.lowe.urlshortener.exception.ExpiredUrlException;
 import com.lowe.urlshortener.exception.InvalidUrlException;
 import com.lowe.urlshortener.exception.UrlNotExistException;
 import com.lowe.urlshortener.dto.request.UrlDto;
 import com.lowe.urlshortener.models.Url;
-
-import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 

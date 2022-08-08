@@ -1,17 +1,19 @@
 package com.lowe.urlshortener.controller;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
+
 import javax.servlet.http.HttpServletResponse;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.lowe.urlshortener.constants.Constants;
 import com.lowe.urlshortener.exception.ExpiredUrlException;
 import com.lowe.urlshortener.exception.InvalidUrlException;
 import com.lowe.urlshortener.exception.UrlNotExistException;
+import com.lowe.urlshortener.view.DtoView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.util.ObjectUtils;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,15 +33,18 @@ public class UrlShortenerController {
     private UrlService urlService;
 
 	@PostMapping(value="/generate")
-	public ResponseEntity<?> generateShortLink(@RequestBody UrlDto urlDto){
-			final Url urlToRet = urlService.generateShortLink(urlDto);
-			if (urlToRet != null) {
+	public ResponseEntity<?> generateShortLink(@RequestBody @Validated({DtoView.UrlDtoView.class}) UrlDto urlDto){
+
+		if(!ObjectUtils.isEmpty(urlDto.getUrl())) {
+			final Url shortUrl = urlService.generateShortLink(urlDto);
+			if (shortUrl != null) {
 				UrlResponseDto urlResponseDto = UrlResponseDto.builder()
-						.shortLink(urlToRet.getShortLink())
-						.expirationDate(urlToRet.getExpirationDate())
+						.shortLink(shortUrl.getShortLink())
+						.expirationDate(shortUrl.getExpirationDate().toString())
 						.build();
 				return new ResponseEntity<>(urlResponseDto, HttpStatus.OK);
 			}
+		}
 			final UrlErrorResponseDto urlErrorResponseDto = UrlErrorResponseDto.builder()
 					.status(String.valueOf(HttpStatus.BAD_REQUEST))
 					.error(Constants.BAD_REQUEST_ERROR_MESSAGE)

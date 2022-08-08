@@ -1,10 +1,15 @@
 package com.lowe.urlshortener.exception;
 
-import java.util.function.Supplier;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+@Slf4j
+public class UrlNotExistException extends ResponseStatusException {
 
-public class UrlNotExistException extends Exception {
+    public UrlNotExistException(final HttpStatus status, final String message) {
+        super(status, message);
+        log.error("Status {},message {}", status,message);
 
-    public UrlNotExistException(final String message){
-        super(message);
+
     }
 }

@@ -1,8 +1,14 @@
 package com.lowe.urlshortener.exception;
 
-public class ExpiredUrlException extends Exception{
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+@Slf4j
+public class ExpiredUrlException extends ResponseStatusException {
 
-    public ExpiredUrlException(final String message){
-        super(message);
+    public ExpiredUrlException(final HttpStatus status, final String message){
+
+        super(status,message);
+        log.error("Status {},message {}", status,message);
     }
 }

@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.Optional;
 
+import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -33,16 +34,16 @@ public class UrlServiceTest {
     private UrlService urlService = new UrlServiceImpl();
 
     @Test
-    public void GeneratedShortLinkWhenLinkisNotExistedTest() {
+    public void generatedShortLinkWhenLinkIsNotExistedTest() {
 
-        Url url = new Url(1001, "https://www.suvigya.com", "http://localhost:8080/fhjfhhf",
+        Url url = new Url(1001, "https://www.suvigya.com", "http://localhost:8080/090f5757",
                 LocalDate.of(2020, Month.JANUARY, 18).atStartOfDay(),
                 LocalDate.of(2025, Month.JANUARY, 18).atStartOfDay()
         );
         UrlDto urlDto = new UrlDto();
         urlDto.setUrl("https://www.suvigya.com");
         when(urlRepository.findByOriginalLink(Mockito.anyString())).thenReturn(Optional.empty());
-        when(urlRepository.save(Mockito.any())).thenReturn(url);
+        when(urlRepository.saveUrl(Mockito.any())).thenReturn(url);
         Url result = urlService.generateShortLink(urlDto);
         Assertions.assertEquals(url.getShortLink(), result.getShortLink());
     }
@@ -78,18 +79,37 @@ public class UrlServiceTest {
     }
 
     @Test
-    public void getOriginalLinkWhenShortLinkIsEmptyTest() {
-        String shortUrl = "";
-        Url result = null;
-        try {
-            result = urlService.getOriginalLink(shortUrl);
-        } catch (UrlNotExistException e) {
-            Assertions.assertEquals("Url for this link is not present", e.getMessage());
-        } catch (ExpiredUrlException e) {
-            Assertions.assertEquals("Url Link is expired", e.getMessage());
-        } catch (InvalidUrlException e) {
-            Assertions.assertEquals("Url is short of length", e.getMessage());
-        }
-
+    public void testExceptionWhenUrlExpired() {
+        Url url= new Url(1001, "https://www.suvigya.com", "http://localhost:8080/fhjfhhf",
+                LocalDate.of(2018, Month.JANUARY, 18).atStartOfDay(),
+                LocalDate.of(2019, Month.JANUARY, 18).atStartOfDay()
+        );
+        when(urlRepository.findByShortLink(Mockito.anyString())).thenReturn(Optional.of(url));
+        ExpiredUrlException exception = assertThrows(ExpiredUrlException.class,()->{
+            urlService.getOriginalLink("http://localhost:8080/fhjfhhf")  ;
+        });
     }
-}
+    @Test
+    public void testExceptionWhenUrlNotExist() {
+        Url url= new Url(1001, "https://www.suvigya.com", "http://localhost:8080/fhjfhhf",
+                LocalDate.of(2018, Month.JANUARY, 18).atStartOfDay(),
+                LocalDate.of(2019, Month.JANUARY, 18).atStartOfDay()
+        );
+        InvalidUrlException exception = assertThrows(InvalidUrlException.class,()->{
+            urlService.getOriginalLink("")  ;
+        });
+    }
+    @Test
+    public void testExceptionWhenUrlIsInvalid() {
+        Url url= new Url(1001, "https://www.suvigya.com", "http://localhost:8080/fhjfhhf",
+                LocalDate.of(2018, Month.JANUARY, 18).atStartOfDay(),
+                LocalDate.of(2019, Month.JANUARY, 18).atStartOfDay()
+        );
+        when(urlRepository.findByShortLink(Mockito.anyString())).thenReturn(Optional.empty());
+        UrlNotExistException exception = assertThrows(UrlNotExistException.class,()->{
+            urlService.getOriginalLink("http://localhost:8080/fhjfhhf")  ;
+        });
+    }
+    }
+
+
