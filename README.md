@@ -1,4 +1,4 @@
-# LoweRepository
+# URL-Shortener Spring Boot Application
 
 URL-Shortener application helps you create a tiny URL (shortened url) which helps in giving a lot of advantages in different aspects of business like Data analytics, gather click data and moreover eases out life as they are conveniently sharable and usable in areas where there are character limits.
 
