@@ -2,7 +2,7 @@ package com.lowe.urlshortener.constants;
 
 public class Constants {
 
-    public static final String DOMAIN_NAME="http://localhost:8080/";
+    public static final String DOMAIN_NAME="http://localhost:9091/";
 
     public static final String BAD_REQUEST_ERROR_MESSAGE = "There was an error processing your request. please try "
             + "again.";

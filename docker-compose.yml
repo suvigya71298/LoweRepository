@@ -1,0 +1,37 @@
+version: "3.7"
+services:
+
+  url-shortener:
+    build: .
+    restart: on-failure
+    ports:
+      - 9091:8080
+    container_name: url-shortener
+    depends_on:
+      - mongoapp
+    networks:
+      - shared-net
+      
+  url-shortener-frontend:
+    image: url-shortener-frontend:latest
+    restart: on-failure
+    ports:
+      - 9092:3000
+    container_name: url-shortener-frontend
+    depends_on:
+      - url-shortener
+    networks:
+      - shared-net
+      
+  mongoapp:
+    image: mongo:4.4.3
+    container_name: mongoapp
+    restart: on-failure
+    ports:
+      - 27017:27017
+    networks:
+      - shared-net
+  
+networks:
+  shared-net:
+    driver: bridge
